@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Port Scanner</h2>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="card">
+        <div class="card-body">
+            <form id="scanForm">
+                <div class="form-group">
+                    <label for="target">Target (IP or Domain)</label>
+                    <input type="text" class="form-control" id="target" name="target" required 
+                           placeholder="Enter IP address or domain name">
+                </div>
+                <div class="form-group">
+                    <label for="port_range">Port Range</label>
+                    <input type="text" class="form-control" id="port_range" name="port_range" 
+                           value="1-1024" placeholder="e.g., 1-1024, 80,443,8080">
+                    <small class="form-text text-muted">Enter port range (e.g., 1-1024) or specific ports (e.g., 80,443,8080)</small>
+                </div>
+                <button type="submit" class="btn btn-primary" id="submitBtn">Start Scan</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="scanProgress" class="card mt-4" style="display: none;">
+        <div class="card-body">
+            <h5>Scan in Progress</h5>
+            <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" 
+                     style="width: 100%"></div>
+            </div>
+            <p class="text-center mt-2">Please wait while the scan is running...</p>
+        </div>
+    </div>
+
+    <div id="scanResults" class="mt-4" style="display: none;">
+        <!-- Results will be populated here -->
+    </div>
+
+    {% if no_results %}
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="alert alert-warning">
+                <h5>No Results Found</h5>
+                <p>The scan completed but no ports were found. This could mean:</p>
+                <ul>
+                    <li>All scanned ports are closed</li>
+                    <li>The target is not accessible</li>
+                    <li>A firewall is blocking the scan</li>
+                </ul>
+                <p>Try:</p>
+                <ul>
+                    <li>Scanning a different port range</li>
+                    <li>Checking if the target is online</li>
+                    <li>Verifying your network connection</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+document.getElementById('scanForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show progress indicator
+    document.getElementById('scanProgress').style.display = 'block';
+    document.getElementById('submitBtn').disabled = true;
+    document.getElementById('scanResults').style.display = 'none';
+    
+    // Get form data
+    const formData = new FormData();
+    formData.append('target', document.getElementById('target').value);
+    formData.append('port_range', document.getElementById('port_range').value);
+    
+    // Send scan request
+    fetch('{{ url_for("port_scan") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Hide progress indicator
+        document.getElementById('scanProgress').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+        
+        // Display results
+        const resultsDiv = document.getElementById('scanResults');
+        resultsDiv.innerHTML = html;
+        resultsDiv.style.display = 'block';
+        
+        // Scroll to results
+        resultsDiv.scrollIntoView({ behavior: 'smooth' });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('scanProgress').style.display = 'none';
+        document.getElementById('submitBtn').disabled = false;
+        alert('Error during scan: ' + error);
+    });
+});
+</script>
+
+<style>
+.progress {
+    height: 20px;
+}
+.form-group {
+    margin-bottom: 1rem;
+}
+.alert ul {
+    margin-bottom: 0.5rem;
+}
+.badge {
+    font-size: 90%;
+}
+.table td, .table th {
+    vertical-align: middle;
+}
+</style>
+{% endblock %} 

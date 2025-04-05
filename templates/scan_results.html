@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-body">
+            <h3>Scan Details</h3>
+            
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <strong>Target:</strong>
+                    <div>{{ results.target }}</div>
+                </div>
+                <div class="col-md-3">
+                    <strong>Status:</strong>
+                    <div>{{ results.status|default('completed') }}</div>
+                </div>
+                <div class="col-md-3">
+                    <strong>Tools Used:</strong>
+                    <div>{{ results.current_tool|default('') }}</div>
+                </div>
+                <div class="col-md-3">
+                    <strong>Current Tool:</strong>
+                    <div>{{ results.current_tool|default('') }}</div>
+                </div>
+            </div>
+
+            {% if 'dns-lookup' in results.results %}
+            <div class="mt-4">
+                <h4>DNS Records</h4>
+                {% set dns_results = results.results['dns-lookup'] %}
+                {% if dns_results and dns_results.records %}
+                    <div class="row">
+                    {% for record_type, records in dns_results.records.items() %}
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{{ record_type }} Records</h5>
+                                </div>
+                                <div class="card-body">
+                                    {% for record in records %}
+                                        {{ record }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No DNS records found.</div>
+                {% endif %}
+
+                {% if dns_results.vulnerabilities %}
+                <div class="mt-4">
+                    <h4>Security Findings</h4>
+                    {% for vuln in dns_results.vulnerabilities %}
+                    <div class="alert alert-{{ 'danger' if vuln.severity == 'high' else 'warning' if vuln.severity == 'medium' else 'info' }}">
+                        <span class="badge bg-{{ 'danger' if vuln.severity == 'high' else 'warning' if vuln.severity == 'medium' else 'info' }}">
+                            {{ vuln.type }}
+                        </span>
+                        {{ vuln.description }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if 'whois-lookup' in results.results %}
+            <div class="mt-4">
+                <h4>WHOIS Information</h4>
+                {% set whois_results = results.results['whois-lookup'] %}
+                {% if whois_results %}
+                    {% if whois_results.error %}
+                        <div class="alert alert-danger">
+                            {{ whois_results.error }}
+                        </div>
+                    {% else %}
+                        {% if whois_results.records %}
+                            <div class="row">
+                                {% for key, value in whois_results.records.items() %}
+                                    <div class="col-md-4">
+                                        <div class="card mb-3">
+                                            <div class="card-header">
+                                                <h5 class="mb-0">{{ key|replace('_', ' ')|title }} Records</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                {% if value is string %}
+                                                    {{ value }}
+                                                {% elif value is iterable %}
+                                                    {% for item in value %}
+                                                        {{ item }}
+                                                    {% endfor %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">No WHOIS information found.</div>
+                        {% endif %}
+
+                        {% if whois_results.vulnerabilities %}
+                        <div class="mt-4">
+                            <h4>Security Findings</h4>
+                            {% for vuln in whois_results.vulnerabilities %}
+                            <div class="alert alert-{{ 'danger' if vuln.severity == 'high' else 'warning' if vuln.severity == 'medium' else 'info' }}">
+                                <span class="badge bg-{{ 'danger' if vuln.severity == 'high' else 'warning' if vuln.severity == 'medium' else 'info' }}">
+                                    {{ vuln.type }}
+                                </span>
+                                {{ vuln.description }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-warning">WHOIS lookup results are empty.</div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if 'port-scan' in results.results %}
+            <div class="mt-4">
+                <h4>Port Scan Results</h4>
+                {% set port_results = results.results['port-scan'] %}
+                {% if port_results %}
+                    {% if port_results.error %}
+                        <div class="alert alert-danger">
+                            Error during port scan: {{ port_results.error }}
+                        </div>
+                    {% else %}
+                        {% if port_results.structured_data and port_results.structured_data.hosts %}
+                            {% for host in port_results.structured_data.hosts %}
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Host: {{ host.address }} {% if host.hostname %}({{ host.hostname }}){% endif %}</h5>
+                                        <span class="badge {% if host.state == 'up' %}badge-success{% else %}badge-danger{% endif %}">
+                                            {{ host.state }}
+                                        </span>
+                                    </div>
+                                    <div class="card-body">
+                                        {% for proto, ports in host.protocols.items() %}
+                                            <div class="card mb-3">
+                                                <div class="card-header bg-light">
+                                                    <h6 class="mb-0">{{ proto|upper }} Protocol</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    {% for port in ports %}
+                                                        <div class="card mb-2">
+                                                            <div class="card-body py-2">
+                                                                <div class="row align-items-center">
+                                                                    <div class="col-md-2">
+                                                                        <strong>Port {{ port.port }}</strong>
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        <span class="badge {% if port.state == 'open' %}badge-success{% elif port.state == 'filtered' %}badge-warning{% else %}badge-danger{% endif %}">
+                                                                            {{ port.state }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        {% if port.service %}
+                                                                            <strong>Service:</strong> {{ port.service }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    <div class="col-md-3">
+                                                                        {% if port.product or port.version %}
+                                                                            <strong>Version:</strong> {{ port.product }} {{ port.version }}
+                                                                        {% endif %}
+                                                                    </div>
+                                                                    <div class="col-md-2">
+                                                                        {% if port.extrainfo %}
+                                                                            <small class="text-muted">{{ port.extrainfo }}</small>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                                {% if port.scripts %}
+                                                                    <div class="mt-2">
+                                                                        <small class="text-muted">
+                                                                            <strong>Script Results:</strong><br>
+                                                                            {{ port.scripts|tojson(indent=2) }}
+                                                                        </small>
+                                                                    </div>
+                                                                {% endif %}
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info">No port scan results found.</div>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-warning">Port scan results are empty.</div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">New Scan</a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+.card-header {
+    background-color: #f8f9fa;
+    padding: 0.75rem 1rem;
+}
+.card-body {
+    padding: 1rem;
+}
+.card-body > *:not(:last-child) {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+.badge {
+    font-size: 85%;
+    padding: 0.4em 0.6em;
+}
+.alert {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %} 

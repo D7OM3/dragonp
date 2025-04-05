@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DragonEye Security Scanner</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body class="light-theme">
+    <div class="app-container">
+        <!-- Navigation Bar -->
+        <nav class="app-nav">
+            <button id="backButton" class="nav-button" style="display: none;">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <div class="nav-title">DragonEye Scanner</div>
+            <div class="theme-toggle">
+                <button id="themeToggle" class="theme-btn">
+                    <i class="fas fa-lightbulb"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <div class="app-content">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-page="mainPage">
+                    <i class="fas fa-home"></i> Home
+                </button>
+                <button class="nav-tab" data-page="ticketsPage">
+                    <i class="fas fa-ticket-alt"></i> Tickets                </button>
+                <button class="nav-tab" data-page="dashboardPage">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </button>
+                <button class="nav-tab" data-page="alertConfigPage">
+                    <i class="fas fa-bell"></i> Alerts
+                </button>
+            </div>
+
+            <!-- Main Page -->
+            <div id="mainPage" class="page active">
+                <div class="hero">
+                    <div class="logo-container">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="DragonEye Security Scanner" class="hero-logo animate-logo">
+                    </div>
+                    <h1 class="animate-title">DragonEye Security Scanner</h1>
+                    <p class="hero-text animate-text">Select a Scanning Technique to Begin</p>
+                </div>
+
+                <!-- Scan Categories -->
+                <div class="categories">
+                    <div class="category-card" data-type="passive" onclick="showTechniquePage('passive')">
+                        <div class="card-content">
+                            <div class="icon-container">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h2>Passive Scanning</h2>
+                            <p>Non-intrusive reconnaissance including DNS analysis and public records</p>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-type="active" onclick="showTechniquePage('active')">
+                        <div class="card-content">
+                            <div class="icon-container">
+                                <i class="fas fa-radar"></i>
+                            </div>
+                            <h2>Active Scanning</h2>
+                            <p>Comprehensive security assessment with direct target interaction</p>
+                        </div>
+                    </div>
+
+                    <div class="category-card" data-type="combined" onclick="showTechniquePage('combined')">
+                        <div class="card-content">
+                            <div class="icon-container">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <h2>Combined Scanning</h2>
+                            <p>Comprehensive security assessment combining active and passive techniques</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tickets Page -->
+            <div id="ticketsPage" class="page">
+                <div class="tickets-header">
+                    <h2>Vulnerability Tickets</h2>
+                    <div class="tickets-actions">
+                        <select id="ticketFilter" class="ticket-filter">
+                            <option value="all">All Tickets</option>
+                            <option value="open">Open</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                        <button class="btn-refresh">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="tickets-list">
+                    <!-- Tickets will be dynamically populated here -->
+                </div>
+            </div>
+
+            <!-- Technique Pages -->
+            <div id="passivePage" class="page technique-page">
+                <div class="technique-container">
+                    <!-- Tool Selection Sidebar -->
+                    <div class="tool-sidebar">
+                        <h3>Available Tools</h3>
+                        <div class="tool-list">
+                            <div class="tool-item" data-tool="dns-lookup">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">DNS Lookup</span>
+                                        <span class="tool-description">Standard DNS record lookup (A, AAAA, MX, etc.)</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="whois-lookup">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">WHOIS Lookup</span>
+                                        <span class="tool-description">Domain registration and ownership information</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="ssl-check">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-lock"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">SSL Certificate Check</span>
+                                        <span class="tool-description">SSL/TLS certificate analysis</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="dns-zone">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">DNS Zone Transfer</span>
+                                        <span class="tool-description">Attempt zone transfer from DNS servers</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="reverse-ip">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-undo"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Reverse IP Lookup</span>
+                                        <span class="tool-description">Find domains sharing the same IP</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="email-records">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-envelope"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Email Security Records</span>
+                                        <span class="tool-description">Check MX, SPF, and DMARC records</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="security-headers">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Security Headers</span>
+                                        <span class="tool-description">Analyze HTTP security headers</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="robots-txt">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-robot"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Robots.txt Analyzer</span>
+                                        <span class="tool-description">Analyze robots.txt directives</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="cert-transparency">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-certificate"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Certificate Transparency</span>
+                                        <span class="tool-description">Search SSL certificate logs</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="dns-sec">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-lock"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">DNSSEC Checker</span>
+                                        <span class="tool-description">Verify DNSSEC configuration</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Command Preview Area -->
+                    <div class="command-preview">
+                        <h3>Selected Tools</h3>
+                        <div class="selected-tools">
+                            <!-- Selected tools will be displayed here -->
+                        </div>
+                        <div class="command-editor">
+                            <h4>Command Preview</h4>
+                            <div class="editor-container">
+                                <pre><code class="command-text">No tools selected</code></pre>
+                                <button class="btn-edit">
+                                    <i class="fas fa-edit"></i> Edit Command
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Area -->
+                    <div class="config-area">
+                        <div class="scan-config-form">
+                            <div class="form-group">
+                                <label for="passiveTarget">Target Domain:</label>
+                                <input type="text" id="passiveTarget" placeholder="Enter domain name">
+                            </div>
+                            <div class="advanced-options">
+                                <h4>Advanced Options</h4>
+                                <!-- Tool-specific options will be dynamically loaded here -->
+                            </div>
+                            <button class="start-scan-btn">Start Passive Scan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="activePage" class="page technique-page">
+                <div class="technique-container">
+                    <div class="tool-sidebar">
+                        <h3>Available Tools</h3>
+                        <div class="tool-list">
+                            <div class="tool-item" data-tool="port-scan">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-network-wired"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Port Scanner</span>
+                                        <span class="tool-description">Network port scanning and service detection</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="xss-scan">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-code"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">XSS Scanner</span>
+                                        <span class="tool-description">Cross-site scripting vulnerability detection</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="sqli-scan">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-database"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">SQL Injection Scanner</span>
+                                        <span class="tool-description">SQL injection vulnerability detection</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="dir-enum">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-folder-open"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Directory Enumeration</span>
+                                        <span class="tool-description">Web directory and file discovery</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="cms-scan">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-plug"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">CMS Scanner</span>
+                                        <span class="tool-description">Content Management System vulnerability scanner</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="waf-detect">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">WAF Detection</span>
+                                        <span class="tool-description">Web Application Firewall detection and analysis</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="banner-grab">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-file-code"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Banner Grabbing</span>
+                                        <span class="tool-description">Service version detection and banner analysis</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="tool-item" data-tool="traceroute">
+                                <div class="tool-info">
+                                    <div class="tool-icon">
+                                        <i class="fas fa-route"></i>
+                                    </div>
+                                    <div class="tool-text">
+                                        <span class="tool-name">Traceroute</span>
+                                        <span class="tool-description">Network path and routing analysis</span>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="command-preview">
+                        <h3>Selected Tools</h3>
+                        <div class="selected-tools">
+                            <!-- Selected tools will be displayed here -->
+                        </div>
+                        <div class="command-editor">
+                            <h4>Command Preview</h4>
+                            <div class="editor-container">
+                                <pre><code class="command-text">No tools selected</code></pre>
+                                <button class="btn-edit">
+                                    <i class="fas fa-edit"></i> Edit Command
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-area">
+                        <div class="scan-config-form">
+                            <div class="form-group">
+                                <label for="activeTarget">Target:</label>
+                                <input type="text" id="activeTarget" placeholder="Enter IP or domain">
+                            </div>
+                            <div class="advanced-options">
+                                <h4>Advanced Options</h4>
+                                <!-- Tool-specific options will be dynamically loaded here -->
+                            </div>
+                            <button class="start-scan-btn">Start Active Scan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="combinedPage" class="page technique-page">
+                <div class="technique-container">
+                    <!-- Tool Selection Sidebar -->
+                    <div class="tool-sidebar">
+                        <h3>Available Tools</h3>
+                        <div class="tool-list">
+                            <!-- Passive Tools -->
+                            <div class="tool-section">
+                                <h4>Passive Reconnaissance</h4>
+                                <div class="tool-item" data-tool="dns-lookup">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">DNS Lookup</span>
+                                            <span class="tool-description">Standard DNS record lookup (A, AAAA, MX, etc.)</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="whois-lookup">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-id-card"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">WHOIS Lookup</span>
+                                            <span class="tool-description">Domain registration and ownership information</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="ssl-check">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">SSL Certificate Check</span>
+                                            <span class="tool-description">SSL/TLS certificate analysis</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="subdomain-enum">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-sitemap"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Subdomain Enumeration</span>
+                                            <span class="tool-description">Discover subdomains through DNS</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="tool-item" data-tool="dns-zone">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">DNS Zone Transfer</span>
+                                            <span class="tool-description">Attempt zone transfer from DNS servers</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="reverse-ip">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-undo"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Reverse IP Lookup</span>
+                                            <span class="tool-description">Find domains sharing the same IP</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="email-records">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Email Security Records</span>
+                                            <span class="tool-description">Check MX, SPF, and DMARC records</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="security-headers">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Security Headers</span>
+                                            <span class="tool-description">Analyze HTTP security headers</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="robots-txt">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-robot"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Robots.txt Analyzer</span>
+                                            <span class="tool-description">Analyze robots.txt directives</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="cert-transparency">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-certificate"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Certificate Transparency</span>
+                                            <span class="tool-description">Search SSL certificate logs</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="dns-sec">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-lock"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">DNSSEC Checker</span>
+                                            <span class="tool-description">Verify DNSSEC configuration</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Active Tools -->
+                            <div class="tool-section">
+                                <h4>Active Scanning</h4>
+                                <div class="tool-item" data-tool="port-scan">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-network-wired"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Port Scanner</span>
+                                            <span class="tool-description">Network port scanning and service detection</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="xss-scan">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">XSS Scanner</span>
+                                            <span class="tool-description">Cross-site scripting vulnerability detection</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="sqli-scan">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-database"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">SQL Injection Scanner</span>
+                                            <span class="tool-description">SQL injection vulnerability detection</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="dir-enum">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-folder-open"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Directory Enumeration</span>
+                                            <span class="tool-description">Web directory and file discovery</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="cms-scan">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-plug"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">CMS Scanner</span>
+                                            <span class="tool-description">Content Management System vulnerability scanner</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="waf-detect">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-shield-alt"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">WAF Detection</span>
+                                            <span class="tool-description">Web Application Firewall detection and analysis</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="banner-grab">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-file-code"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Banner Grabbing</span>
+                                            <span class="tool-description">Service version detection and banner analysis</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="tool-item" data-tool="traceroute">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-route"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Traceroute</span>
+                                            <span class="tool-description">Network path and routing analysis</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="tool-item" data-tool="http-headers">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">HTTP Headers</span>
+                                            <span class="tool-description">Analyze HTTP response headers</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="tool-item" data-tool="tech-detect">
+                                    <div class="tool-info">
+                                        <div class="tool-icon">
+                                            <i class="fas fa-code"></i>
+                                        </div>
+                                        <div class="tool-text">
+                                            <span class="tool-name">Technology Detection</span>
+                                            <span class="tool-description">Identify web technologies and frameworks</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                                                                <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Command Preview Area -->
+                    <div class="command-preview">
+                        <h3>Selected Tools</h3>
+                        <div class="selected-tools">
+                            <div class="no-tools">No tools selected</div>
+                        </div>
+                        <div class="command-editor">
+                            <h4>Command Preview</h4>
+                            <div class="editor-container">
+                                <pre><code class="command-text">No tools selected</code></pre>
+                                <button class="btn-edit">
+                                    <i class="fas fa-edit"></i> Edit Command
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Configuration Area -->
+                    <div class="config-area">
+                        <div class="scan-config-form">
+                            <div class="form-group">
+                                <label for="combinedTarget">Target:</label>
+                                <input type="text" id="combinedTarget" placeholder="Enter target URL or IP">
+                            </div>
+                            <div class="advanced-options">
+                                <h4>Scan Options</h4>
+                                <div class="form-group">
+                                    <label>Scan Speed</label>
+                                    <select id="scanSpeed">
+                                        <option value="slow">Slow (Stealthy)</option>
+                                        <option value="normal" selected>Normal</option>
+                                        <option value="fast">Fast (Aggressive)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Port Range</label>
+                                    <input type="text" id="portRange" placeholder="e.g., 1-1000,3389,8080">
+                                </div>
+                            </div>
+                            <button class="start-scan-btn">Start Combined Scan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vulnerabilityPage" class="page technique-page">
+                <div class="technique-header">
+                    <h2>Vulnerability Analysis Configuration</h2>
+                </div>
+                <div class="technique-content">
+                    <div class="scan-config-form">
+                        <div class="form-group">
+                            <label for="vulnTarget">Target:</label>
+                            <input type="text" id="vulnTarget" placeholder="Enter target URL or IP">
+                        </div>
+                        <div class="technique-options">
+                            <div class="option-group">
+                                <h3>Vulnerability Types</h3>
+                                <div class="checkbox-group">
+                                    <label><input type="checkbox"> Web Application</label>
+                                    <label><input type="checkbox"> Network Services</label>
+                                    <label><input type="checkbox"> Infrastructure</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="start-scan-btn">Start Vulnerability Scan</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="dashboardPage" class="page">
+                <div class="dashboard-header">
+                    <h2>Security Dashboard</h2>
+                    <div class="dashboard-actions">
+                        <button class="btn-refresh">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                        <select id="timeRange" class="dashboard-select">
+                            <option value="24h">Last 24 Hours</option>
+                            <option value="7d">Last 7 Days</option>
+                            <option value="30d">Last 30 Days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Real-time Scan Progress -->
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>Active Scans</h3>
+                        <div class="active-scans">
+                            <canvas id="activeScanChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Risk Score Overview</h3>
+                        <div class="risk-score">
+                            <canvas id="riskScoreChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Vulnerability Trends</h3>
+                        <div class="vuln-trends">
+                            <canvas id="vulnTrendChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-card">
+                        <h3>Recent Alerts</h3>
+                        <div class="recent-alerts">
+                            <div class="alert-list">
+                                <!-- Alerts will be dynamically populated -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert Configuration Page -->
+            <div id="alertConfigPage" class="page">
+                <div class="alert-config-header">
+                    <h2>Alert Configuration</h2>
+                </div>
+                <div class="alert-config-content">
+                    <div class="config-card">
+                        <h3>Email Notifications</h3>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableEmailAlerts"> Enable Email Alerts
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label for="alertEmail">Alert Email Address</label>
+                            <input type="email" id="alertEmail" placeholder="Enter email address">
+                        </div>
+                        <div class="severity-thresholds">
+                            <h4>Alert Thresholds</h4>
+                            <div class="threshold-group">
+                                <label>
+                                    <input type="checkbox" checked> Critical Vulnerabilities
+                                </label>
+                                <label>
+                                    <input type="checkbox"> High Severity
+                                </label>
+                                <label>
+                                    <input type="checkbox"> Medium Severity
+                                </label>
+                            </div>
+                        </div>
+                        <button id="testEmailBtn" class="btn-primary">
+                            Test Email Configuration
+                        </button>
+                    </div>
+
+                    <div class="config-card">
+                        <h3>Scan Schedule</h3>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enableScheduledScans"> Enable Scheduled Scans
+                            </label>
+                        </div>
+                        <div class="schedule-options">
+                            <div class="form-group">
+                                <label for="scanFrequency">Scan Frequency</label>
+                                <select id="scanFrequency">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="scanTime">Preferred Time</label>
+                                <input type="time" id="scanTime">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <h3>Custom Alert Rules</h3>
+                        <div id="customRules">
+                            <!-- Custom rules will be added dynamically -->
+                        </div>
+                        <button id="addRuleBtn" class="btn-secondary">
+                            <i class="fas fa-plus"></i> Add Custom Rule
+                        </button>
+                    </div>
+                </div>
+                <div class="alert-config-actions">
+                    <button id="saveAlertConfig" class="btn-primary">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

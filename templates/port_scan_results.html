@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Port Scan Results</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Target Information</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Target:</strong> {{ results.target }}</p>
+            <p><strong>Scan Time:</strong> {{ results.timestamp }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Scanned Ports</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Port</th>
+                            <th>State</th>
+                            <th>Service</th>
+                            <th>Version</th>
+                            <th>Product</th>
+                            <th>Extra Info</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for port in results.ports %}
+                        <tr class="{% if port.state == 'open' %}table-success{% elif port.state == 'filtered' %}table-warning{% elif port.state == 'closed' %}table-danger{% endif %}">
+                            <td><strong>{{ port.port }}</strong></td>
+                            <td>
+                                <span class="badge {% if port.state == 'open' %}badge-success{% elif port.state == 'filtered' %}badge-warning{% elif port.state == 'closed' %}badge-danger{% else %}badge-secondary{% endif %}">
+                                    {{ port.state }}
+                                </span>
+                            </td>
+                            <td>{{ port.service if port.service != 'unknown' else '' }}</td>
+                            <td>{{ port.version if port.version != 'unknown' else '' }}</td>
+                            <td>{{ port.product if port.product != 'unknown' else '' }}</td>
+                            <td>{{ port.extrainfo if port.extrainfo != '' else '' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if results.vulnerabilities %}
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">Vulnerabilities Found</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>Severity</th>
+                            <th>Port</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vuln in results.vulnerabilities %}
+                        <tr>
+                            <td>{{ vuln.type }}</td>
+                            <td>{{ vuln.description }}</td>
+                            <td>
+                                <span class="badge {% if vuln.severity == 'High' %}badge-danger
+                                                  {% elif vuln.severity == 'Medium' %}badge-warning
+                                                  {% else %}badge-info{% endif %}">
+                                    {{ vuln.severity }}
+                                </span>
+                            </td>
+                            <td>{{ vuln.port }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mt-4 mb-4">
+        <a href="{{ url_for('port_scan') }}" class="btn btn-primary">New Scan</a>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Port State Legend</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <span class="badge badge-success">open</span> - Port is accepting connections
+                </div>
+                <div class="col-md-4">
+                    <span class="badge badge-warning">filtered</span> - Port is filtered by a firewall
+                </div>
+                <div class="col-md-4">
+                    <span class="badge badge-danger">closed</span> - Port is not accepting connections
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.badge {
+    font-size: 90%;
+}
+.table td, .table th {
+    vertical-align: middle;
+}
+</style>
+{% endblock %} 
